@@ -5,7 +5,8 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import fs from 'fs'
 import { CoreProcessManager } from './core-process'
 import { generateCoreConfig, DIRECT_RULE_SETS } from './config-generator'
-import { normalizePathConfig, PATH_ONE_RULES } from '../shared/path-line'
+import { DEFAULT_MIXED_PORT, normalizePathConfig, PATH_ONE_RULES } from '../shared/path-line'
+import { probeLine, type ProbeKind } from './line-probe'
 import { getControllerSecret } from './controller-secret'
 import { scheduleTray } from './tray'
 import { setAutoStart, isAutoStartEnabled } from './autostart'
@@ -48,7 +49,7 @@ const coreManager = new CoreProcessManager()
 const trafficManager = new TrafficManager()
 
 const DEFAULT_CONFIG: AppConfig = normalizePathConfig({
-  mixedPort: 8888,
+  mixedPort: DEFAULT_MIXED_PORT,
   tunEnabled: false,
   systemProxy: false,
   autoStart: false,
@@ -1096,6 +1097,11 @@ if (!gotTheLock) {
     })
     ipcMain.handle('util:allow-uwp-loopback', async () => {
       return await SystemServiceManager.allowUwpLoopback()
+    })
+
+    ipcMain.handle('line:probe', async (_, kind: ProbeKind) => {
+      const cfg = loadSavedConfig()
+      return await probeLine(kind, cfg.mixedPort || DEFAULT_MIXED_PORT)
     })
 
     // Window controls

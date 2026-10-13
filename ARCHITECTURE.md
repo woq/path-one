@@ -4,10 +4,12 @@
 
 ## 产品边界
 
-- 首页填写端口 / 账号 / 密码；服务器 `10.0.0.101`，协议 socks5，节点名 `Path`
-- 本地混合端口默认 **8888**
+- 「账号」页填写端口 / 账号 / 密码；固定上游节点名 `Path`（见 `path-line.ts`）
+- 本地端口默认 **8888**
 - 路由：固定直连规则（只读）+ 用户自定义规则 + 固定 MATCH→PROXY
-- 侧栏：首页、路由分流、使用说明、系统服务、内核日志
+- 侧栏分组：操作（账号 / 浏览器 / 全局 / 路由 / 服务 / 日志）+ 说明（快速开始 / 确认已通 / 常见问题）
+- 「账号」页含国内（直连）/ 国外（经本机端口）连通测试：`line:probe` → `line-probe.ts`
+- 用户文档：`GUIDE.md` 索引 + `guide/*.md` 分篇
 - 生产只出 unpack：`pnpm build:unpack` → `dist/win-unpacked`
 
 ## 配置流
@@ -29,8 +31,10 @@
 ## 目录
 
 ```text
-src/main/                 主进程
-src/shared/path-line.ts   固定线路、直连规则、规则合并
-src/renderer/src/pages/   Home / Routing / Guide / SystemService / Logs
-resources/binaries/       core.exe、core.sha256、PathOneService
+src/main/                      主进程（含 line-probe.ts）
+src/shared/path-line.ts        固定线路、直连规则、规则合并
+src/renderer/src/pages/        Account / BrowserMode / GlobalMode / Routing / …
+src/renderer/src/pages/guide/  GuideStart / GuideVerify / GuideFaq
+guide/*.md                     分篇用户文档（GUIDE.md 为目录）
+resources/binaries/            core.exe、core.sha256、PathOneService
 ```

@@ -26,6 +26,8 @@ electronLanguages:
   - en-US
 win:
   # Production delivery is unpack only (dist/win-unpacked). No NSIS / zip artifacts.
+  # WSL/Linux host has no wine: skip PE sign/edit so --dir packaging can finish.
+  signAndEditExecutable: false
   target:
     - target: dir
       arch:

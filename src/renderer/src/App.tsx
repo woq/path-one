@@ -1,15 +1,23 @@
 import React, { useEffect, useState } from 'react'
 import { TitleBar } from './components/TitleBar'
-import { Home } from './pages/Home'
-import { Guide } from './pages/Guide'
+import { Account } from './pages/Account'
+import { BrowserMode } from './pages/BrowserMode'
+import { GlobalMode } from './pages/GlobalMode'
+import { GuideStart } from './pages/guide/GuideStart'
+import { GuideVerify } from './pages/guide/GuideVerify'
+import { GuideFaq } from './pages/guide/GuideFaq'
 import { Routing } from './pages/Routing'
 import { Logs } from './pages/Logs'
 import { SystemService } from './pages/SystemService'
 import {
   AlertTriangle,
   BookOpen,
-  Home as HomeIcon,
+  CheckCircle2,
+  CircleHelp,
+  Globe,
+  KeyRound,
   RefreshCw,
+  Rocket,
   Route,
   Terminal,
   Wrench,
@@ -35,18 +43,44 @@ const INITIAL_CONFIG: AppConfig = {
   rules: PATH_ONE_RULES
 }
 
-type TabId = 'home' | 'routing' | 'guide' | 'service' | 'logs'
+type TabId =
+  | 'account'
+  | 'browser'
+  | 'global'
+  | 'routing'
+  | 'service'
+  | 'logs'
+  | 'guide-start'
+  | 'guide-verify'
+  | 'guide-faq'
 
-const NAV_ITEMS: { id: TabId; label: string; icon: React.ReactNode }[] = [
-  { id: 'home', label: '首页', icon: <HomeIcon className="w-4 h-4" /> },
-  { id: 'routing', label: '路由分流', icon: <Route className="w-4 h-4" /> },
-  { id: 'guide', label: '使用说明', icon: <BookOpen className="w-4 h-4" /> },
-  { id: 'service', label: '系统服务', icon: <Wrench className="w-4 h-4" /> },
-  { id: 'logs', label: '内核日志', icon: <Terminal className="w-4 h-4" /> }
+type NavItem = { id: TabId; label: string; icon: React.ReactNode }
+type NavGroup = { title: string; items: NavItem[] }
+
+const NAV_GROUPS: NavGroup[] = [
+  {
+    title: '操作',
+    items: [
+      { id: 'account', label: '账号', icon: <KeyRound className="w-4 h-4" /> },
+      { id: 'browser', label: '浏览器模式', icon: <Globe className="w-4 h-4" /> },
+      { id: 'global', label: '全局模式', icon: <Rocket className="w-4 h-4" /> },
+      { id: 'routing', label: '路由分流', icon: <Route className="w-4 h-4" /> },
+      { id: 'service', label: '系统服务', icon: <Wrench className="w-4 h-4" /> },
+      { id: 'logs', label: '内核日志', icon: <Terminal className="w-4 h-4" /> }
+    ]
+  },
+  {
+    title: '说明',
+    items: [
+      { id: 'guide-start', label: '快速开始', icon: <BookOpen className="w-4 h-4" /> },
+      { id: 'guide-verify', label: '确认已通', icon: <CheckCircle2 className="w-4 h-4" /> },
+      { id: 'guide-faq', label: '常见问题', icon: <CircleHelp className="w-4 h-4" /> }
+    ]
+  }
 ]
 
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabId>('home')
+  const [activeTab, setActiveTab] = useState<TabId>('account')
   const [config, setConfig] = useState<AppConfig>(INITIAL_CONFIG)
   const [abnormalAlert, setAbnormalAlert] = useState<{
     reason: string
@@ -170,45 +204,60 @@ export const App: React.FC = () => {
       )}
 
       <div className="flex flex-1 overflow-hidden">
-        <aside className="w-52 bg-fx-elevated flex flex-col justify-between p-3 select-none shadow-soft">
-          <div className="space-y-0.5">
-            {NAV_ITEMS.map((item) => {
-              const active = activeTab === item.id
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  aria-current={active ? 'page' : undefined}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`fx-nav ${active ? 'fx-nav-active' : ''}`}
-                >
-                  {item.icon}
-                  <span>{item.label}</span>
-                </button>
-              )
-            })}
-          </div>
+        <aside className="w-52 bg-fx-elevated flex flex-col p-3 select-none shadow-soft min-h-0">
+          <nav className="flex-1 overflow-y-auto space-y-4 pr-0.5">
+            {NAV_GROUPS.map((group) => (
+              <div key={group.title} className="space-y-0.5">
+                <div className="px-3 pb-1 text-[10px] font-medium tracking-[0.18em] uppercase text-fx-muted/55">
+                  {group.title}
+                </div>
+                {group.items.map((item) => {
+                  const active = activeTab === item.id
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      aria-current={active ? 'page' : undefined}
+                      onClick={() => setActiveTab(item.id)}
+                      className={`fx-nav ${active ? 'fx-nav-active' : ''}`}
+                    >
+                      {item.icon}
+                      <span>{item.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            ))}
+          </nav>
 
-          <div className="px-3 py-2.5 rounded-xl bg-fx-bg/80 text-center">
+          <div className="mt-3 px-3 py-2.5 rounded-xl bg-fx-bg/80 text-center shrink-0">
             <div className="text-[11px] font-medium text-fx-muted/80">Path One</div>
-            <div className="text-[10px] text-fx-muted/50 mt-0.5">端口 {DEFAULT_MIXED_PORT}</div>
+            <div className="text-[10px] text-fx-muted/50 mt-0.5">本地端口 {DEFAULT_MIXED_PORT}</div>
           </div>
         </aside>
 
         <main className="flex-1 overflow-y-auto p-7 bg-transparent">
-          {activeTab === 'home' && (
-            <Home
+          {activeTab === 'account' && (
+            <Account config={config} onUpdateConfig={handleUpdateConfig} />
+          )}
+          {activeTab === 'browser' && (
+            <BrowserMode config={config} onUpdateConfig={handleUpdateConfig} />
+          )}
+          {activeTab === 'global' && (
+            <GlobalMode
               config={config}
               onUpdateConfig={handleUpdateConfig}
-              onOpenGuide={() => setActiveTab('guide')}
+              onOpenService={() => setActiveTab('service')}
             />
           )}
           {activeTab === 'routing' && (
             <Routing config={config} onUpdateConfig={handleUpdateConfig} />
           )}
-          {activeTab === 'guide' && <Guide />}
           {activeTab === 'service' && <SystemService />}
           {activeTab === 'logs' && <Logs />}
+          {activeTab === 'guide-start' && <GuideStart />}
+          {activeTab === 'guide-verify' && <GuideVerify />}
+          {activeTab === 'guide-faq' && <GuideFaq />}
         </main>
       </div>
     </div>

@@ -70,6 +70,14 @@ export const api = {
   fixFirewall: () => ipcRenderer.invoke('util:fix-firewall'),
   fixWintun: () => ipcRenderer.invoke('util:fix-wintun'),
   allowUwpLoopback: () => ipcRenderer.invoke('util:allow-uwp-loopback'),
+  probeLine: (kind: 'domestic' | 'overseas') =>
+    ipcRenderer.invoke('line:probe', kind) as Promise<{
+      ok: boolean
+      kind: 'domestic' | 'overseas'
+      label: string
+      ms: number
+      detail: string
+    }>,
 
   // Traffic Analytics
   getTrafficSummary: () => ipcRenderer.invoke('traffic:get-summary'),
