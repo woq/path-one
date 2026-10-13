@@ -361,7 +361,7 @@ export function generateCoreConfig(
   const configObj: Record<string, unknown> = {
     port: 0,
     'socks-port': 0,
-    'mixed-port': appConfig.mixedPort || 7890,
+    'mixed-port': appConfig.mixedPort || 8888,
     'allow-lan': false,
     mode: 'rule',
     'log-level': 'info',

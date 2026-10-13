@@ -8,7 +8,7 @@ import { LinkParser } from '../src/main/link-parser.ts'
 import { resolvePreviewMode } from '../src/main/preview-mode.ts'
 
 const baseConfig = {
-  mixedPort: 7890,
+  mixedPort: 8888,
   tunEnabled: false,
   systemProxy: false,
   autoStart: false,

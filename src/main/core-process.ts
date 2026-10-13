@@ -21,7 +21,7 @@ export class CoreProcessManager {
   private serviceWatchTimer: NodeJS.Timeout | null = null
   private serviceWatchToken = 0
   private bypassServiceWait = false
-  private listenerPorts: () => number[] = () => [7890, 9090]
+  private listenerPorts: () => number[] = () => [8888, 9090]
   private onAbnormalListener: ((reason: string, occupants?: PortOccupant[]) => void) | null = null
 
   constructor() {
@@ -280,7 +280,7 @@ export class CoreProcessManager {
         ) {
           portConflictDetected = true
           LogManager.pushRaw(
-            `[CoreManager] ⚠️ 端口冲突告警：核心监听端口 (7890/9090) 已被其他程序占用！`,
+            `[CoreManager] ⚠️ 端口冲突告警：核心监听端口 (8888/9090) 已被其他程序占用！`,
             true
           )
         }
@@ -296,7 +296,7 @@ export class CoreProcessManager {
         ) {
           portConflictDetected = true
           LogManager.pushRaw(
-            `[CoreManager] ⚠️ 端口冲突告警：核心监听端口 (7890/9090) 已被其他程序占用！`,
+            `[CoreManager] ⚠️ 端口冲突告警：核心监听端口 (8888/9090) 已被其他程序占用！`,
             true
           )
         }

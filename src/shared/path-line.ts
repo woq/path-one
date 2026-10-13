@@ -4,9 +4,10 @@ import type { AppConfig, ProxyNode, RouteRuleItem } from '../renderer/src/types'
 export const FIXED_LINE_SERVER = '10.0.0.101'
 export const FIXED_LINE_TYPE = 'socks5'
 export const PATH_NODE_NAME = 'Path'
+export const DEFAULT_MIXED_PORT = 8888
 
-/** Simple private/CN direct + MATCH proxy — no node picker, no rule editor. */
-export const PATH_ONE_RULES: RouteRuleItem[] = [
+/** Built-in DIRECT rules — always present, not editable in the UI. */
+export const PATH_ONE_DIRECT_RULES: RouteRuleItem[] = [
   {
     id: 'rule-lan-10',
     type: 'IP-CIDR',
@@ -54,16 +55,30 @@ export const PATH_ONE_RULES: RouteRuleItem[] = [
     target: 'DIRECT',
     enabled: true,
     description: '国内 IP 直连'
-  },
-  {
-    id: 'rule-fallback',
-    type: 'MATCH',
-    payload: '',
-    target: 'PROXY',
-    enabled: true,
-    description: '其余走线路'
   }
 ]
+
+export const PATH_ONE_MATCH_RULE: RouteRuleItem = {
+  id: 'rule-fallback',
+  type: 'MATCH',
+  payload: '',
+  target: 'PROXY',
+  enabled: true,
+  description: '其余走线路'
+}
+
+export const PATH_ONE_DIRECT_IDS = new Set(PATH_ONE_DIRECT_RULES.map((r) => r.id))
+
+/** Full default rule list (direct + match). */
+export const PATH_ONE_RULES: RouteRuleItem[] = [...PATH_ONE_DIRECT_RULES, PATH_ONE_MATCH_RULE]
+
+export function isLockedDirectRule(rule: RouteRuleItem): boolean {
+  return PATH_ONE_DIRECT_IDS.has(rule.id)
+}
+
+export function isLockedMatchRule(rule: RouteRuleItem): boolean {
+  return rule.id === PATH_ONE_MATCH_RULE.id || rule.type === 'MATCH'
+}
 
 export function buildPathNode(port: string, username: string, password: string): ProxyNode {
   const portNum = Number(port)
@@ -92,7 +107,14 @@ export function credentialsComplete(cfg: Pick<AppConfig, 'linePort' | 'lineUsern
   )
 }
 
-/** Force Path One shape: one fixed socks5 node + fixed rules. */
+/** Keep custom rules; always pin locked direct rules + MATCH. */
+export function mergePathRules(rules: RouteRuleItem[] | undefined): RouteRuleItem[] {
+  const incoming = Array.isArray(rules) ? rules : []
+  const custom = incoming.filter((r) => !isLockedDirectRule(r) && !isLockedMatchRule(r))
+  return [...PATH_ONE_DIRECT_RULES, ...custom, PATH_ONE_MATCH_RULE]
+}
+
+/** Force Path One shape: one fixed socks5 node + merged rules. */
 export function normalizePathConfig(cfg: AppConfig): AppConfig {
   const linePort = String(cfg.linePort ?? '').trim()
   const lineUsername = String(cfg.lineUsername ?? '').trim()
@@ -102,7 +124,7 @@ export function normalizePathConfig(cfg: AppConfig): AppConfig {
 
   return {
     ...cfg,
-    mixedPort: 7890,
+    mixedPort: DEFAULT_MIXED_PORT,
     linePort,
     lineUsername,
     linePassword,
@@ -112,6 +134,6 @@ export function normalizePathConfig(cfg: AppConfig): AppConfig {
     subscriptions: [],
     manualNodes: [],
     nodes,
-    rules: PATH_ONE_RULES
+    rules: mergePathRules(cfg.rules)
   }
 }

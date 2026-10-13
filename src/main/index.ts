@@ -48,7 +48,7 @@ const coreManager = new CoreProcessManager()
 const trafficManager = new TrafficManager()
 
 const DEFAULT_CONFIG: AppConfig = normalizePathConfig({
-  mixedPort: 7890,
+  mixedPort: 8888,
   tunEnabled: false,
   systemProxy: false,
   autoStart: false,
@@ -104,7 +104,7 @@ function saveUserConfig(config: AppConfig) {
 }
 
 function listenerPorts(): number[] {
-  const port = loadSavedConfig().mixedPort || 7890
+  const port = loadSavedConfig().mixedPort || 8888
   return [port, 9090]
 }
 
@@ -575,7 +575,7 @@ if (!gotTheLock) {
       cfg.systemProxy = enable
       saveUserConfig(cfg)
       if (enable) {
-        const ok = await SystemProxyManager.enable(cfg.mixedPort || 7890)
+        const ok = await SystemProxyManager.enable(cfg.mixedPort || 8888)
         return { success: ok }
       } else {
         const ok = await SystemProxyManager.disable()

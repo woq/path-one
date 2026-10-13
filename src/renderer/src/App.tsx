@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { TitleBar } from './components/TitleBar'
 import { Home } from './pages/Home'
 import { Guide } from './pages/Guide'
+import { Routing } from './pages/Routing'
 import { Logs } from './pages/Logs'
 import { SystemService } from './pages/SystemService'
 import {
@@ -9,15 +10,16 @@ import {
   BookOpen,
   Home as HomeIcon,
   RefreshCw,
+  Route,
   Terminal,
   Wrench,
   X
 } from 'lucide-react'
 import type { AppConfig } from './types'
-import { PATH_ONE_RULES } from '../../shared/path-line'
+import { DEFAULT_MIXED_PORT, PATH_ONE_RULES } from '../../shared/path-line'
 
 const INITIAL_CONFIG: AppConfig = {
-  mixedPort: 7890,
+  mixedPort: DEFAULT_MIXED_PORT,
   tunEnabled: false,
   systemProxy: false,
   autoStart: false,
@@ -33,10 +35,11 @@ const INITIAL_CONFIG: AppConfig = {
   rules: PATH_ONE_RULES
 }
 
-type TabId = 'home' | 'guide' | 'service' | 'logs'
+type TabId = 'home' | 'routing' | 'guide' | 'service' | 'logs'
 
 const NAV_ITEMS: { id: TabId; label: string; icon: React.ReactNode }[] = [
   { id: 'home', label: '首页', icon: <HomeIcon className="w-4 h-4" /> },
+  { id: 'routing', label: '路由分流', icon: <Route className="w-4 h-4" /> },
   { id: 'guide', label: '使用说明', icon: <BookOpen className="w-4 h-4" /> },
   { id: 'service', label: '系统服务', icon: <Wrench className="w-4 h-4" /> },
   { id: 'logs', label: '内核日志', icon: <Terminal className="w-4 h-4" /> }
@@ -188,7 +191,7 @@ export const App: React.FC = () => {
 
           <div className="px-3 py-2.5 rounded-xl bg-fx-bg/80 text-center">
             <div className="text-[11px] font-medium text-fx-muted/80">Path One</div>
-            <div className="text-[10px] text-fx-muted/50 mt-0.5">三项凭据 · Soft Tonal</div>
+            <div className="text-[10px] text-fx-muted/50 mt-0.5">端口 {DEFAULT_MIXED_PORT}</div>
           </div>
         </aside>
 
@@ -199,6 +202,9 @@ export const App: React.FC = () => {
               onUpdateConfig={handleUpdateConfig}
               onOpenGuide={() => setActiveTab('guide')}
             />
+          )}
+          {activeTab === 'routing' && (
+            <Routing config={config} onUpdateConfig={handleUpdateConfig} />
           )}
           {activeTab === 'guide' && <Guide />}
           {activeTab === 'service' && <SystemService />}

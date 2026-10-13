@@ -120,7 +120,7 @@ function enableOurs(port: number): boolean {
 }
 
 export class SystemProxyManager {
-  public static async enable(port = 7890): Promise<boolean> {
+  public static async enable(port = 8888): Promise<boolean> {
     if (process.platform !== 'win32') return false
     try {
       if (!readBackup()) writeBackup(backupForEnable(readSnapshot(), port))

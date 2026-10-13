@@ -11,7 +11,12 @@ import {
   WifiOff
 } from 'lucide-react'
 import type { AppConfig } from '../types'
-import { FIXED_LINE_SERVER, FIXED_LINE_TYPE, credentialsComplete } from '../../../shared/path-line'
+import {
+  DEFAULT_MIXED_PORT,
+  FIXED_LINE_SERVER,
+  FIXED_LINE_TYPE,
+  credentialsComplete
+} from '../../../shared/path-line'
 
 interface HomeProps {
   config: AppConfig
@@ -63,7 +68,7 @@ export const Home: React.FC<HomeProps> = ({ config, onUpdateConfig, onOpenGuide 
     const nextUser = username.trim()
     const nextPass = password.trim()
     if (!nextPort || !nextUser || !nextPass) {
-      setSaveMsg('三项都要填：端口、账号、密码。')
+      setSaveMsg('请填写端口、账号和密码后再保存。')
       return
     }
     setBusy(true)
@@ -75,7 +80,7 @@ export const Home: React.FC<HomeProps> = ({ config, onUpdateConfig, onOpenGuide 
         lineUsername: nextUser,
         linePassword: nextPass
       })
-      setSaveMsg('已保存。可以打开下面的开关了。')
+      setSaveMsg('已保存。可打开下方模式开关。')
     } finally {
       setBusy(false)
     }
@@ -83,7 +88,7 @@ export const Home: React.FC<HomeProps> = ({ config, onUpdateConfig, onOpenGuide 
 
   const toggleSystemProxy = async () => {
     if (!ready && !config.systemProxy) {
-      setProxyWarning('请先保存端口、账号、密码。')
+      setProxyWarning('请先保存端口、账号和密码。')
       return
     }
     setBusy(true)
@@ -101,7 +106,7 @@ export const Home: React.FC<HomeProps> = ({ config, onUpdateConfig, onOpenGuide 
 
   const toggleTun = async () => {
     if (!ready && !config.tunEnabled) {
-      setTunWarning('请先保存端口、账号、密码。')
+      setTunWarning('请先保存端口、账号和密码。')
       return
     }
     setBusy(true)
@@ -111,7 +116,7 @@ export const Home: React.FC<HomeProps> = ({ config, onUpdateConfig, onOpenGuide 
       if (next) {
         const status = await window.api?.getServiceStatus?.()
         if (!status?.running) {
-          setTunWarning('全局模式需要系统服务在运行。请先到「使用说明」按步骤安装/启动服务，或先用浏览器模式。')
+          setTunWarning('全局模式依赖系统服务。请先到「系统服务」页安装并启动，再打开此开关。')
           setBusy(false)
           return
         }
@@ -150,51 +155,52 @@ export const Home: React.FC<HomeProps> = ({ config, onUpdateConfig, onOpenGuide 
     <div className="max-w-3xl mx-auto space-y-6 select-text">
       <header className="space-y-2">
         <p className="text-xs tracking-[0.2em] uppercase text-fx-muted/70">Path One</p>
-        <h1 className="text-3xl font-semibold text-fx-text tracking-tight">填三项，打开开关</h1>
+        <h1 className="text-3xl font-semibold text-fx-text tracking-tight">首页</h1>
         <p className="text-sm text-fx-muted leading-relaxed">
-          服务器已固定为 <span className="font-mono text-fx-accent">{FIXED_LINE_SERVER}</span>，协议固定{' '}
-          <span className="font-mono text-fx-accent">{FIXED_LINE_TYPE.toUpperCase()}</span>
-          。没有节点列表，也不用选线路。
+          服务器 <span className="font-mono text-fx-accent">{FIXED_LINE_SERVER}</span> · 协议{' '}
+          <span className="font-mono text-fx-accent">{FIXED_LINE_TYPE.toUpperCase()}</span> · 本地混合端口{' '}
+          <span className="font-mono text-fx-accent">{DEFAULT_MIXED_PORT}</span>
         </p>
       </header>
 
       <section className="fx-panel rounded-2xl p-6 space-y-5">
         <div className="flex items-center gap-2 text-fx-text">
           <KeyRound className="w-4 h-4 text-fx-accent" />
-          <h2 className="text-base font-medium">账号（只需三项）</h2>
+          <h2 className="text-base font-medium">账号</h2>
         </div>
+        <p className="text-xs text-fx-muted -mt-2">对照开通通知填写端口、账号、密码，然后保存。</p>
 
         <div className="grid gap-4">
           <label className="block space-y-1.5">
-            <span className="text-xs text-fx-muted">1) 端口</span>
+            <span className="text-xs text-fx-muted">端口</span>
             <input
               className="w-full rounded-xl bg-fx-bg px-4 py-3 text-sm text-fx-text outline-none focus:ring-1 focus:ring-fx-accent/40 font-mono"
               value={port}
               onChange={(e) => setPort(e.target.value)}
-              placeholder="对照开通通知填写"
+              placeholder="开通通知中的端口"
               autoComplete="off"
               spellCheck={false}
             />
           </label>
           <label className="block space-y-1.5">
-            <span className="text-xs text-fx-muted">2) 账号</span>
+            <span className="text-xs text-fx-muted">账号</span>
             <input
               className="w-full rounded-xl bg-fx-bg px-4 py-3 text-sm text-fx-text outline-none focus:ring-1 focus:ring-fx-accent/40 font-mono"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="对照开通通知填写"
+              placeholder="开通通知中的账号"
               autoComplete="off"
               spellCheck={false}
             />
           </label>
           <label className="block space-y-1.5">
-            <span className="text-xs text-fx-muted">3) 密码</span>
+            <span className="text-xs text-fx-muted">密码</span>
             <input
               type="password"
               className="w-full rounded-xl bg-fx-bg px-4 py-3 text-sm text-fx-text outline-none focus:ring-1 focus:ring-fx-accent/40 font-mono"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="对照开通通知填写"
+              placeholder="开通通知中的密码"
               autoComplete="off"
               spellCheck={false}
             />
@@ -227,7 +233,7 @@ export const Home: React.FC<HomeProps> = ({ config, onUpdateConfig, onOpenGuide 
                 浏览器模式
               </div>
               <p className="text-xs text-fx-muted mt-1.5 leading-relaxed">
-                打开系统代理。适合网页。一般不需要管理员。
+                打开 Windows 系统代理，指向本机 {DEFAULT_MIXED_PORT} 端口。适合浏览器访问。
               </p>
             </div>
             <button
@@ -262,7 +268,7 @@ export const Home: React.FC<HomeProps> = ({ config, onUpdateConfig, onOpenGuide 
                 全局模式
               </div>
               <p className="text-xs text-fx-muted mt-1.5 leading-relaxed">
-                TUN 接管。Git / 命令行需要这个。需系统服务已运行。
+                启用 TUN，让命令行、Git 等也走线路。需「系统服务」页中服务已在运行。
               </p>
             </div>
             <button
@@ -305,7 +311,7 @@ export const Home: React.FC<HomeProps> = ({ config, onUpdateConfig, onOpenGuide 
               )}
             </div>
             <div className="text-xs text-fx-muted mt-0.5">
-              {ready ? '账号已保存' : '尚未保存完整账号'} · 本地端口 7890
+              {ready ? '账号已保存' : '账号未保存完整'} · 本地端口 {DEFAULT_MIXED_PORT}
             </div>
           </div>
         </div>

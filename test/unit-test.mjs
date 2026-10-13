@@ -179,7 +179,7 @@ function generateCoreConfig(cfg) {
   const selectorProxies = proxyNames.length > 0 ? [...proxyNames, 'DIRECT', 'REJECT'] : ['DIRECT', 'REJECT']
 
   const configObj = {
-    'mixed-port': cfg.mixedPort || 7890,
+    'mixed-port': cfg.mixedPort || 8888,
     'allow-lan': true,
     mode: 'rule',
     'log-level': 'info',
@@ -294,7 +294,7 @@ test('SubscriptionManager: parseUserInfo header parsing', () => {
 
 test('ConfigGenerator: Valid core YAML generation and TUN flags', () => {
   const cfg = {
-    mixedPort: 7890,
+    mixedPort: 8888,
     tunEnabled: true,
     systemProxy: false,
     activeNode: 'HK-01',
@@ -306,13 +306,13 @@ test('ConfigGenerator: Valid core YAML generation and TUN flags', () => {
   }
 
   const yamlStr = generateCoreConfig(cfg)
-  assert.ok(yamlStr.includes('mixed-port: 7890'))
+  assert.ok(yamlStr.includes('mixed-port: 8888'))
   assert.ok(yamlStr.includes('tun:'))
   assert.ok(yamlStr.includes('enable: true'))
   assert.ok(yamlStr.includes('stack: mixed'))
 
   const parsed = YAML.parse(yamlStr)
-  assert.equal(parsed['mixed-port'], 7890)
+  assert.equal(parsed['mixed-port'], 8888)
   assert.equal(parsed.tun.enable, true)
   assert.equal(parsed.proxies.length, 1) // Only HK-01, DIRECT/REJECT filtered out
   assert.equal(parsed.proxies[0].name, 'HK-01')

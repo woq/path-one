@@ -7,13 +7,13 @@ import { LogManager } from './log-manager'
  * Priority 2: Automatic fallback to DIRECT connection if proxy fails or is offline
  */
 export class NetClient {
-  public static defaultPort = 7890
+  public static defaultPort = 8888
 
   /**
    * Executes an HTTP request with dual-channel (Proxy -> Direct fallback) strategy.
    *
    * @param config Standard AxiosRequestConfig
-   * @param mixedPort Optional core mixed port (default 7890)
+   * @param mixedPort Optional core mixed port (default 8888)
    * @returns AxiosResponse
    */
   public static async request<T = unknown>(
