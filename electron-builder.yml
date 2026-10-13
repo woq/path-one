@@ -1,0 +1,33 @@
+appId: com.pathone.app
+productName: path-one
+directories:
+  output: dist
+  buildResources: resources
+files:
+  - out/**/*
+  - resources/**/*
+  - '!resources/binaries/**/*'
+  - package.json
+extraResources:
+  - from: resources/binaries
+    to: binaries
+    filter:
+      - '**/*'
+  - from: resources/icon.ico
+    to: icon.ico
+  - from: resources/icon.png
+    to: icon.png
+  - from: resources/windows
+    to: windows
+    filter:
+      - '**/*.ps1'
+electronLanguages:
+  - zh-CN
+  - en-US
+win:
+  # Production delivery is unpack only (dist/win-unpacked). No NSIS / zip artifacts.
+  target:
+    - target: dir
+      arch:
+        - x64
+  icon: resources/icon.ico

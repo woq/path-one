@@ -1,0 +1,109 @@
+name: Release Windows x64 unpack
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release Tag (leave empty if triggering from a tag)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    name: Build win-unpacked
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+          run_install: false
+
+      - name: Setup Node.js 20 with pnpm cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Use Official NPM Registry in CI
+        shell: pwsh
+        run: |
+          if (Test-Path ".npmrc") {
+            Remove-Item ".npmrc" -Force
+          }
+
+      - name: Install Node Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Prepare core binaries
+        run: node scripts/prepare-binaries.mjs
+        env:
+          FORCE_DOWNLOAD: 'true'
+          CORE_UPSTREAM_VERSION: 'v1.19.32'
+
+      - name: Determine Release Tag
+        id: release_tag
+        shell: pwsh
+        run: |
+          $inputTag = "${{ github.event.inputs.tag }}"
+          if ($inputTag -ne "") {
+            $tag = $inputTag
+          } elseif ($env:GITHUB_REF -like "refs/tags/*") {
+            $tag = $env:GITHUB_REF -replace "refs/tags/", ""
+          } else {
+            $tag = "v" + (Get-Content package.json | ConvertFrom-Json).version
+          }
+          $version = (Get-Content package.json | ConvertFrom-Json).version
+          $tagVersion = $tag -replace '^v', ''
+          if ($tagVersion -ne $version) {
+            throw "Tag $tag does not match package.json version $version"
+          }
+          Write-Host "Target Tag: $tag"
+          echo "TAG_NAME=$tag" >> $env:GITHUB_ENV
+          echo "APP_VERSION=$version" >> $env:GITHUB_ENV
+          $notes = "- path-one-Windows-$version-x64-unpacked.zip (`dist/win-unpacked`)"
+          Set-Content -Encoding utf8 -Path "$env:GITHUB_WORKSPACE/release-notes.md" -Value $notes
+
+      - name: Build unpack
+        run: pnpm run build:unpack
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: Zip win-unpacked
+        shell: pwsh
+        run: |
+          $version = $env:APP_VERSION
+          $src = "dist/win-unpacked"
+          if (-not (Test-Path $src)) { throw "missing $src" }
+          $zip = "dist/path-one-Windows-$version-x64-unpacked.zip"
+          if (Test-Path $zip) { Remove-Item $zip -Force }
+          Compress-Archive -Path "$src\*" -DestinationPath $zip
+          Write-Host "Created $zip"
+
+      - name: List Artifacts
+        shell: pwsh
+        run: Get-ChildItem -Path dist
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          draft: false
+          prerelease: false
+          body_path: release-notes.md
+          files: |
+            dist/path-one-Windows-*-x64-unpacked.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
